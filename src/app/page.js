@@ -1,17 +1,11 @@
 import Sidebar from "./components/Sidebar";
-import BottomBar from "./components/BottomBar";
-import Header from "./components/Header";
-import Notes from "./components/Notes";
+import MainContent from "./components/MainContent";
 
 export default function HomePage() {
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen text-slate-700 bg-white relative">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <Notes />
-        <BottomBar />
-      </div>
+      <MainContent />
     </div>
   );
 }
