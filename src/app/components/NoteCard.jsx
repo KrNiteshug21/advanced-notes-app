@@ -4,13 +4,27 @@ import {
   Image as ImageIcon,
   MoreHorizontal,
   Pencil,
+  Type,
 } from "lucide-react";
 import React, { useState } from "react";
 import { NoteModal } from "./NoteModal";
 
+const formatDate = (date) => {
+  return new Date(date)
+    .toLocaleString("en-US", {
+      month: "short", // "Jan"
+      day: "2-digit", // "30"
+      year: "numeric", // "2025"
+      hour: "2-digit", // "5 PM"
+      minute: "2-digit",
+      hour12: true, // Use 12-hour format
+    })
+    .replace(",", " •"); // Replace default comma
+};
+
 const NoteCard = ({ note }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log("isModalOpen", isModalOpen);
+
   const handleNoteClick = () => {
     setIsModalOpen(true);
   };
@@ -24,19 +38,27 @@ const NoteCard = ({ note }) => {
         <div className="flex justify-between items-start mb-2">
           <div>
             <div className="mb-1 text-gray-500 text-xs">
-              Jan 30, 2025 • 5:26 PM
+              {formatDate(note.createdAt)}
             </div>
-            <h3 className="font-medium">Engineering Assignment Audio</h3>
+            <h3 className="font-medium">{note.title}</h3>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-500 text-xs">00:09</span>
+          <div className="flex items-center gap-1 text-xs">
+            {note.contentType === "audio" ? (
+              <>
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-gray-500 text-xs">{note.duration}</span>
+              </>
+            ) : (
+              <>
+                <Type className="bg-black p-0.5 rounded-sm w-3.5 h-3.5 text-white" />
+                <span className="font-semibold text-gray-500 text-xs tracking-wider">
+                  Text
+                </span>
+              </>
+            )}
           </div>
         </div>
-        <p className="mb-3 text-gray-600 text-sm">
-          I'm recording an audio to transcribe into text for the assignment of
-          engineering in terms of actors.
-        </p>
+        <p className="mb-3 text-gray-600 text-sm">{note.content}</p>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
             <ImageIcon className="w-4 h-4 text-gray-400" />

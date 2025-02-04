@@ -13,6 +13,7 @@ import {
   Minimize2,
   Maximize2,
 } from "lucide-react";
+import { useState } from "react";
 
 export function EditModal({
   isFullscreen,
@@ -22,6 +23,7 @@ export function EditModal({
   onSave,
   initialContent,
 }) {
+  const [content, setContent] = useState(initialContent);
   if (!isOpen) return null;
 
   return (
@@ -48,7 +50,7 @@ export function EditModal({
           <div className="flex items-center gap-2">
             <button
               className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm"
-              onClick={() => onSave(initialContent)}
+              onClick={() => onSave(content)}
             >
               Save
             </button>
@@ -63,7 +65,8 @@ export function EditModal({
           <textarea
             className="border-0 w-full h-full resize-none focus:outline-none text-gray-600"
             placeholder="It seems like the input you provided doesn't contain any meaningful text or transcript to format. If you have a specific transcript or text you'd like me to format, please provide that, and I'll be happy to help!"
-            defaultValue={initialContent}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
           />
         </div>
 

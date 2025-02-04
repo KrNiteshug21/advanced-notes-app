@@ -10,9 +10,11 @@ import {
   Copy,
   Plus,
   Minimize2,
+  Pencil,
 } from "lucide-react";
 import Image from "next/image";
 import { EditModal } from "./EditModal";
+import { revalidatePath } from "next/cache";
 
 export function NoteModal({ isOpen, onClose, note }) {
   const [activeTab, setActiveTab] = useState("transcript");
@@ -23,12 +25,20 @@ export function NoteModal({ isOpen, onClose, note }) {
 
   if (!isOpen) return null;
 
-  const handleSave = (content) => {
+  const handleSave = async (content) => {
+    // Handle saving the edited content
+    const res = await fetch(`/api/note/${note._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    const data = await res.json();
+    console.log("notedata", data);
     // Handle saving the edited content
     setIsEditMode(false);
   };
 
-  const togfleFullscreen = () => {
+  const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
 
@@ -45,7 +55,7 @@ export function NoteModal({ isOpen, onClose, note }) {
           {/* Modal Header */}
           <div className="flex justify-between items-center p-4 border-b">
             <div className="flex items-center gap-3">
-              <button onClick={togfleFullscreen}>
+              <button onClick={toggleFullscreen}>
                 {isFullscreen ? (
                   <Minimize2 className="w-5 h-5 text-gray-400" />
                 ) : (
@@ -70,7 +80,7 @@ export function NoteModal({ isOpen, onClose, note }) {
           <div className="p-4 border-b">
             <h2 className="flex items-center gap-2 font-semibold text-xl">
               {note.title}
-              <button onClick={togfleFullscreen}>
+              <button onClick={toggleFullscreen}>
                 <Maximize2 className="w-4 h-4 text-gray-400" />
               </button>
             </h2>
@@ -78,34 +88,35 @@ export function NoteModal({ isOpen, onClose, note }) {
           </div>
 
           {/* Audio Player */}
-          <div className="p-4 border-b">
-            <div className="flex items-center gap-4">
-              <button
-                className="flex justify-center items-center bg-gray-100 rounded-full w-8 h-8"
-                onClick={() => setIsPlaying(!isPlaying)}
-              >
-                {isPlaying ? (
-                  <div className="bg-gray-600 rounded-sm w-3 h-3" />
-                ) : (
-                  <div className="border-y-4 border-y-transparent ml-1 border-l-8 border-l-gray-600 w-0 h-0" />
-                )}
-              </button>
-              <div className="flex-1 bg-gray-200 rounded-full h-1">
-                <div
-                  className="relative bg-orange-500 rounded-full h-full"
-                  style={{ width: `${progress}%` }}
+          {note.contentType === "audio" && (
+            <div className="p-4 border-b">
+              <div className="flex items-center gap-4">
+                <button
+                  className="flex justify-center items-center bg-gray-100 rounded-full w-8 h-8"
+                  onClick={() => setIsPlaying(!isPlaying)}
                 >
-                  <div className="top-1/2 right-0 absolute bg-orange-500 rounded-full w-3 h-3 -translate-y-1/2" />
+                  {isPlaying ? (
+                    <div className="bg-gray-600 rounded-sm w-3 h-3" />
+                  ) : (
+                    <div className="border-y-4 border-y-transparent ml-1 border-l-8 border-l-gray-600 w-0 h-0" />
+                  )}
+                </button>
+                <div className="flex-1 bg-gray-200 rounded-full h-1">
+                  <div
+                    className="relative bg-orange-500 rounded-full h-full"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="top-1/2 right-0 absolute bg-orange-500 rounded-full w-3 h-3 -translate-y-1/2" />
+                  </div>
                 </div>
+                <div className="text-gray-500 text-sm">{note.duration}</div>
+                <button className="flex items-center gap-1 text-gray-600 text-sm">
+                  <Download className="w-4 h-4" />
+                  Download Audio
+                </button>
               </div>
-              <div className="text-gray-500 text-sm">{note.duration}</div>
-              <button className="flex items-center gap-1 text-gray-600 text-sm">
-                <Download className="w-4 h-4" />
-                Download Audio
-              </button>
             </div>
-          </div>
-
+          )}
           {/* Tabs */}
           <div className="flex gap-4 px-4 border-b">
             {["Notes", "Transcript", "Create", "Speaker Transcript"].map(
@@ -129,34 +140,38 @@ export function NoteModal({ isOpen, onClose, note }) {
           <div className="flex-1 p-4 overflow-auto">
             <div className="flex justify-between items-start mb-4">
               <h3 className="font-medium">Transcript</h3>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
-                  className="flex items-center gap-1 text-gray-600 text-sm"
+                  className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded-sm text-gray-600 text-sm"
                   onClick={() => setIsEditMode(true)}
                 >
+                  <Pencil className="w-3 h-3" />
                   Edit
                 </button>
-                <button className="flex items-center gap-1 text-gray-600 text-sm">
-                  <Copy className="w-4 h-4" />
+                <button className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded-sm text-gray-600 text-sm">
+                  <Copy className="w-3 h-3" />
                   Copy
                 </button>
               </div>
             </div>
-            <p className="mb-4 text-gray-600 text-sm">{note.transcript}</p>
+            <p className="mb-4 text-gray-600 text-sm">{note.content}</p>
 
             {/* Image Attachment */}
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-2 mb-4">
-                <Image
-                  src="/placeholder.svg"
-                  alt="Attachment"
-                  width={40}
-                  height={40}
-                  className="rounded-lg"
-                />
+                {note.images.map((image) => (
+                  <Image
+                    key={image}
+                    src="/placeholder.svg"
+                    alt="Attachment"
+                    width={40}
+                    height={40}
+                    className="rounded-lg"
+                  />
+                ))}
                 <button className="flex items-center gap-2 text-gray-600 text-sm">
                   <Plus className="w-4 h-4" />
-                  Image
+                  <span>Image</span>
                 </button>
               </div>
             </div>
@@ -166,11 +181,11 @@ export function NoteModal({ isOpen, onClose, note }) {
 
       <EditModal
         isFullscreen={isFullscreen}
-        togfleFullscreen={togfleFullscreen}
+        toggleFullscreen={toggleFullscreen}
         isOpen={isEditMode}
         onClose={() => setIsEditMode(false)}
         onSave={handleSave}
-        initialContent={note.transcript}
+        initialContent={note.content}
       />
     </>
   );

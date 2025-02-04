@@ -1,10 +1,12 @@
-import { Home, Star, User } from "lucide-react";
-import { cookies } from "next/headers";
+import { Home, Star } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import AuthStatus from "./AuthStatus";
+import { cookies } from "next/headers";
 
 const Sidebar = async () => {
-  const token = await cookies().get("token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   return (
     <div className="top-0 left-0 fixed w-64 h-full">
@@ -35,14 +37,7 @@ const Sidebar = async () => {
           </Link>
         </nav>
 
-        <div className="p-4 border-t">
-          <button className="flex items-center gap-2 w-full">
-            <div className="flex justify-center items-center bg-gray-900 rounded-full w-6 h-6 text-sm text-white">
-              <User size={20} />
-            </div>
-            <span className="">User</span>
-          </button>
-        </div>
+        <AuthStatus token={token} />
       </div>
     </div>
   );

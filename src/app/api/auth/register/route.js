@@ -25,7 +25,7 @@ export const POST = async (req, res) => {
     const hashPwd = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashPwd });
 
-    return NextResponse.json({ newUser }, { status: 201 });
+    return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

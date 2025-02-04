@@ -11,6 +11,7 @@ const noteSchema = new mongoose.Schema(
       required: true,
     },
     contentType: {
+      type: String,
       enum: ["text", "audio"],
       required: true,
     },
@@ -22,5 +23,4 @@ const noteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Note = mongoose.model("Note", noteSchema) || mongoose.models.Note;
-export default Note;
+export default mongoose.models.Note || mongoose.model("Note", noteSchema);
