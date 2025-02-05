@@ -16,6 +16,7 @@ import { EditModal } from "./EditModal";
 import { formatTime } from "@/utils/util";
 import NoteTitle from "./NoteTitle";
 import ImageUploader from "./ImageUploader";
+import CopyToClipboard from "./CopyToClipboard";
 
 const initModalObj = {
   header: "",
@@ -206,10 +207,7 @@ export function NoteModal({ isOpen, onClose, note }) {
                   <Pencil className="w-3 h-3" />
                   Edit
                 </button>
-                <button className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded-sm text-gray-600 text-sm">
-                  <Copy className="w-3 h-3" />
-                  Copy
-                </button>
+                <CopyToClipboard textToCopy={note.content} />
               </div>
             </div>
             <p className="mb-4 text-gray-600 text-sm">{note.content}</p>
