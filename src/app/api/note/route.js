@@ -9,7 +9,7 @@ export const GET = async (req, res) => {
     const notes = await Note.find();
     return NextResponse.json(notes, { status: 200 });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 };
 
@@ -27,7 +27,8 @@ export const POST = async (req, res) => {
     if (!decoded)
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const { title, content, contentType } = await req.json();
+    const body = await req.json();
+    const { title, content, contentType } = body;
 
     const noteExists = await Note.findOne({ title });
     if (noteExists) {
@@ -39,7 +40,7 @@ export const POST = async (req, res) => {
 
     let noteToAdd = { title, content, contentType };
     if (contentType === "audio") {
-      const { duration } = req.body;
+      const { duration } = body;
       noteToAdd = { ...noteToAdd, duration };
     }
 

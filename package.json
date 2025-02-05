@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@uploadthing/react": "^7.1.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.474.0",
@@ -16,7 +17,8 @@
     "mongoose": "^8.9.6",
     "next": "15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uploadthing": "^7.4.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

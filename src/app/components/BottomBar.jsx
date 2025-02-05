@@ -5,6 +5,7 @@ import { AddNoteModal } from "./AddNoteModal";
 
 const BottomBar = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("text");
 
   const handleModalToggle = () => {
     setOpenModal((prev) => !prev);
@@ -16,7 +17,10 @@ const BottomBar = () => {
         <div className="flex justify-between items-center border-gray-400 p-2 border rounded-full">
           <div className="flex items-center gap-4">
             <button
-              onClick={handleModalToggle}
+              onClick={() => {
+                handleModalToggle();
+                setActiveTab("text");
+              }}
               className="hover:bg-gray-100 p-2 rounded-lg"
             >
               <Pencil className="w-5 h-5 text-gray-600" />
@@ -25,12 +29,23 @@ const BottomBar = () => {
               <ImageIcon className="w-5 h-5 text-gray-600" />
             </button>
           </div>
-          <button className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full text-sm text-white">
+          <button
+            onClick={() => {
+              handleModalToggle();
+              setActiveTab("audio");
+            }}
+            className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full text-sm text-white"
+          >
             start recording
           </button>
         </div>
       </div>
-      <AddNoteModal isOpen={openModal} onClose={handleModalToggle} />
+      <AddNoteModal
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpen={openModal}
+        onClose={handleModalToggle}
+      />
     </>
   );
 };

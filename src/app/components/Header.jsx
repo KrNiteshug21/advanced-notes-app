@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import React from "react";
 
-const Header = () => {
+const Header = ({ search, setSearch }) => {
   return (
     <header className="top-0 sticky flex justify-between items-center gap-2 bg-white p-2 pt-4">
       <div className="flex-1">
@@ -11,6 +11,8 @@ const Header = () => {
             type="search"
             placeholder="Search"
             className="focus:border-purple-500 py-2 pr-4 pl-10 border rounded-full w-full text-sm focus:outline-none"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>

@@ -8,13 +8,21 @@ import {
   Share2,
   Download,
   Copy,
-  Plus,
   Minimize2,
   Pencil,
 } from "lucide-react";
 import Image from "next/image";
 import { EditModal } from "./EditModal";
-import { revalidatePath } from "next/cache";
+import { formatTime } from "@/utils/util";
+import NoteTitle from "./NoteTitle";
+import ImageUploader from "./ImageUploader";
+
+const initModalObj = {
+  header: "",
+  msg: "",
+  trigger: false,
+  clickFunction: () => {},
+};
 
 export function NoteModal({ isOpen, onClose, note }) {
   const [activeTab, setActiveTab] = useState("transcript");
@@ -22,20 +30,72 @@ export function NoteModal({ isOpen, onClose, note }) {
   const [progress, setProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [modalObj, setModalObj] = useState(initModalObj);
 
   if (!isOpen) return null;
 
-  const handleSave = async (content) => {
-    // Handle saving the edited content
+  const handleUpdate = async ({ data, updateType }) => {
     const res = await fetch(`/api/note/${note._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ data, updateType }),
     });
-    const data = await res.json();
-    console.log("notedata", data);
-    // Handle saving the edited content
-    setIsEditMode(false);
+
+    if (res.ok) {
+      const updatedData = await res.json();
+      console.log("updatedData", updatedData);
+      setIsEditMode(false);
+      setModalObj({
+        header: "Success",
+        msg: "Note has been updated successfully",
+        trigger: true,
+        clickFunction: () => {
+          setModalObj(initModalObj);
+          setIsEditMode(false);
+          window.location.reload();
+          // onClose();
+        },
+      });
+    } else {
+      setModalObj({
+        header: "Error",
+        msg: "Error updating note",
+        trigger: true,
+        clickFunction: () => {
+          setModalObj(initModalObj);
+        },
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    const res = await fetch(`/api/note/${note._id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log("deleted", data);
+      setModalObj({
+        header: "Success",
+        msg: "Note has been deleted successfully",
+        trigger: true,
+        clickFunction: () => {
+          setModalObj(initModalObj);
+          // onClose();
+          window.location.reload();
+        },
+      });
+    } else {
+      setModalObj({
+        header: "Error",
+        msg: "Error deleting note",
+        trigger: true,
+        clickFunction: () => {
+          setModalObj(initModalObj);
+        },
+      });
+    }
   };
 
   const toggleFullscreen = () => {
@@ -77,15 +137,11 @@ export function NoteModal({ isOpen, onClose, note }) {
           </div>
 
           {/* Note Title & Date */}
-          <div className="p-4 border-b">
-            <h2 className="flex items-center gap-2 font-semibold text-xl">
-              {note.title}
-              <button onClick={toggleFullscreen}>
-                <Maximize2 className="w-4 h-4 text-gray-400" />
-              </button>
-            </h2>
-            <p className="text-gray-500 text-sm">{note.date}</p>
-          </div>
+          <NoteTitle
+            noteTitle={note.title}
+            createdAt={note.createdAt}
+            handleUpdate={handleUpdate}
+          />
 
           {/* Audio Player */}
           {note.contentType === "audio" && (
@@ -109,7 +165,9 @@ export function NoteModal({ isOpen, onClose, note }) {
                     <div className="top-1/2 right-0 absolute bg-orange-500 rounded-full w-3 h-3 -translate-y-1/2" />
                   </div>
                 </div>
-                <div className="text-gray-500 text-sm">{note.duration}</div>
+                <div className="text-gray-500 text-sm">
+                  {formatTime(note.duration)}
+                </div>
                 <button className="flex items-center gap-1 text-gray-600 text-sm">
                   <Download className="w-4 h-4" />
                   Download Audio
@@ -157,23 +215,31 @@ export function NoteModal({ isOpen, onClose, note }) {
             <p className="mb-4 text-gray-600 text-sm">{note.content}</p>
 
             {/* Image Attachment */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-4">
-                {note.images.map((image) => (
-                  <Image
-                    key={image}
-                    src="/placeholder.svg"
-                    alt="Attachment"
-                    width={40}
-                    height={40}
-                    className="rounded-lg"
-                  />
-                ))}
-                <button className="flex items-center gap-2 text-gray-600 text-sm">
-                  <Plus className="w-4 h-4" />
-                  <span>Image</span>
-                </button>
+            {note.images.length > 0 && (
+              <div className="mb-2 p-2 border rounded-lg h-44">
+                <div className="flex items-center gap-2 h-full">
+                  {note.images.map((image) => (
+                    <Image
+                      key={image}
+                      src={image}
+                      alt={image}
+                      width={400}
+                      height={300}
+                      className="border-gray-200 border rounded-md w-48 h-full object-center object-cover"
+                    />
+                  ))}
+                </div>
               </div>
+            )}
+
+            <div className="flex justify-between items-center">
+              <ImageUploader handleUpdate={handleUpdate} />
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 px-4 py-2 rounded-md text-white"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -184,7 +250,7 @@ export function NoteModal({ isOpen, onClose, note }) {
         toggleFullscreen={toggleFullscreen}
         isOpen={isEditMode}
         onClose={() => setIsEditMode(false)}
-        onSave={handleSave}
+        onSave={handleUpdate}
         initialContent={note.content}
       />
     </>

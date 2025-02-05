@@ -12,8 +12,8 @@ const initModalObj = {
   clickFunction: () => {},
 };
 
-export function AddNoteModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState("text");
+export function AddNoteModal({ isOpen, onClose, activeTab, setActiveTab }) {
+  // const [activeTab, setActiveTab] = useState("text");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -29,7 +29,7 @@ export function AddNoteModal({ isOpen, onClose }) {
       return;
     }
     let noteData = { title, content, contentType: activeTab, images: [] };
-    if (activeTab === "audio") noteData.duration = elapsedTime;
+    if (activeTab === "audio") noteData.duration = elapsedTime.toString();
     console.log(noteData);
 
     const res = await fetch("/api/note", {
@@ -45,13 +45,16 @@ export function AddNoteModal({ isOpen, onClose }) {
         header: "Note Created",
         msg: "Note created successfully!",
         trigger: true,
-        clickFunction: () => setModalObj(initModalObj),
+        clickFunction: () => {
+          setModalObj(initModalObj);
+          setTitle("");
+          setContent("");
+          setElapsedTime(0);
+          setIsRecording(false);
+          onClose();
+          window.location.reload();
+        },
       });
-      setTitle("");
-      setContent("");
-      setElapsedTime(0);
-      setIsRecording(false);
-      onClose();
     } else {
       setModalObj({
         header: "Note Creation Failed",

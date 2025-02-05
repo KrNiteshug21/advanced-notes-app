@@ -5,7 +5,6 @@ import Link from "next/link";
 const AuthStatus = ({ token }) => {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    cookies().remove("token");
     window.location.reload();
   };
 

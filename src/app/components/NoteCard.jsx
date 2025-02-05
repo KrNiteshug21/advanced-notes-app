@@ -8,19 +8,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { NoteModal } from "./NoteModal";
-
-const formatDate = (date) => {
-  return new Date(date)
-    .toLocaleString("en-US", {
-      month: "short", // "Jan"
-      day: "2-digit", // "30"
-      year: "numeric", // "2025"
-      hour: "2-digit", // "5 PM"
-      minute: "2-digit",
-      hour12: true, // Use 12-hour format
-    })
-    .replace(",", " •"); // Replace default comma
-};
+import { formatDate, formatTime } from "@/utils/util";
 
 const NoteCard = ({ note }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +34,9 @@ const NoteCard = ({ note }) => {
             {note.contentType === "audio" ? (
               <>
                 <Clock className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-500 text-xs">{note.duration}</span>
+                <span className="text-gray-500 text-xs">
+                  {formatTime(parseInt(note.duration))}
+                </span>
               </>
             ) : (
               <>
@@ -58,7 +48,9 @@ const NoteCard = ({ note }) => {
             )}
           </div>
         </div>
-        <p className="mb-3 text-gray-600 text-sm">{note.content}</p>
+        <p className="mb-3 text-gray-600 text-justify text-sm">
+          {note.content}
+        </p>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
             <ImageIcon className="w-4 h-4 text-gray-400" />

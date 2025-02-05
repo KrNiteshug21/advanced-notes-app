@@ -17,9 +17,8 @@ export const PUT = async (req, { params }) => {
     if (!decoded)
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const { id } = params;
-    const { content } = await req.json();
-    console.log("content", id, content);
+    const { id } = await params;
+    const body = await req.json();
 
     const noteToUpdate = await Note.findById(id);
     if (!noteToUpdate) {
@@ -29,16 +28,24 @@ export const PUT = async (req, { params }) => {
       );
     }
 
-    noteToUpdate.content = content;
-    const updatedNote = await noteToUpdate.save();
+    console.log("reqbody", body);
 
+    if (body.updateType === "title") {
+      noteToUpdate.title = body.data;
+    } else if (body.updateType === "content") {
+      noteToUpdate.content = body.data;
+    } else if (body.updateType === "images") {
+      noteToUpdate.images.push(body.data);
+    }
+
+    const updatedNote = await noteToUpdate.save();
     return NextResponse.json(updatedNote, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 };
 
-export const DELETE = async (req, res) => {
+export const DELETE = async (req, { params }) => {
   try {
     await connectDB();
 
@@ -52,7 +59,7 @@ export const DELETE = async (req, res) => {
     if (!decoded)
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const { id } = req.query;
+    const { id } = await params;
     const noteToDelete = await Note.findById(id);
     if (!noteToDelete) {
       return NextResponse.json(

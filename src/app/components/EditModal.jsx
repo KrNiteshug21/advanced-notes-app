@@ -27,7 +27,7 @@ export function EditModal({
   if (!isOpen) return null;
 
   return (
-    <div className="z-50 fixed inset-0 flex justify-center items-center bg-black/50">
+    <div className="z-20 fixed inset-0 flex justify-center items-center bg-black/50">
       <div
         className={`flex flex-col bg-white ${
           isFullscreen
@@ -50,7 +50,7 @@ export function EditModal({
           <div className="flex items-center gap-2">
             <button
               className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm"
-              onClick={() => onSave(content)}
+              onClick={() => onSave({ data: content, updateType: "content" })}
             >
               Save
             </button>
