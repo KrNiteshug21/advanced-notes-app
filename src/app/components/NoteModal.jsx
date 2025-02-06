@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   Maximize2,
@@ -32,6 +32,15 @@ export function NoteModal({ isOpen, onClose, note }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [modalObj, setModalObj] = useState(initModalObj);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const favorite = localStorage.getItem("favorite");
+    if (favorite === null) return;
+    const data = JSON.parse(favorite);
+    const noteExist = data.some((n) => n.id === note._id);
+    if (noteExist) setIsFavorite(true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -103,6 +112,22 @@ export function NoteModal({ isOpen, onClose, note }) {
     setIsFullscreen(!isFullscreen);
   };
 
+  const handleFavorite = () => {
+    console.log("Favorite");
+    const favorite = localStorage.getItem("favorite");
+    const noteExist =
+      favorite !== null && JSON.parse(favorite).some((n) => n.id === note._id);
+    if (noteExist) return;
+    if (!favorite) {
+      localStorage.setItem("favorite", JSON.stringify([{ id: note._id }]));
+    } else {
+      const data = JSON.parse(favorite);
+      data.push({ id: note._id });
+      localStorage.setItem("favorite", JSON.stringify(data));
+    }
+    setIsFavorite(true);
+  };
+
   return (
     <>
       <div className="z-20 fixed inset-0 flex justify-center items-center bg-black/50">
@@ -125,7 +150,14 @@ export function NoteModal({ isOpen, onClose, note }) {
               </button>
             </div>
             <div className="flex items-center gap-3">
-              <Star className="w-5 h-5 text-gray-400 cursor-pointer" />
+              <button onClick={handleFavorite}>
+                <Star
+                  fill={isFavorite ? "currentColor" : "none"}
+                  className={`w-5 h-5 ${
+                    isFavorite ? "text-orange-400" : "text-gray-400"
+                  } cursor-pointer`}
+                />
+              </button>
               <button className="flex items-center gap-2 hover:bg-gray-50 px-3 py-1.5 border rounded-lg text-sm">
                 Share
                 <Share2 className="w-4 h-4" />

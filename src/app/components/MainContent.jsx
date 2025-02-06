@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Notes from "./Notes";
 import BottomBar from "./BottomBar";
+import Favorites from "./Favorites";
 
-const MainContent = () => {
+const MainContent = ({ activeTab }) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -24,11 +25,17 @@ const MainContent = () => {
   }, []);
 
   return (
-    <div className="relative flex flex-col flex-1 ml-64">
-      <Header search={search} setSearch={setSearch} />
-      <Notes notes={filteredNotes} loading={loading} />
-      <BottomBar />
-    </div>
+    <>
+      <>
+        <Header search={search} setSearch={setSearch} />
+        {activeTab === "home" ? (
+          <Notes notes={filteredNotes} loading={loading} />
+        ) : (
+          <Favorites notes={filteredNotes} />
+        )}
+        <BottomBar />
+      </>
+    </>
   );
 };
 
